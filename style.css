@@ -1,0 +1,79 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+select,
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    flex: 1;
+    padding: 12px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.output {
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    word-break: break-word;
+    cursor: pointer;
+    user-select: all;
+    font-size: 15px;
+    text-align: left;
+}
+
+/* Kiểu cho thông báo sao chép (bong bóng) */
+.copy-message {
+    position: absolute;
+    background-color: #4caf50;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    visibility: hidden;
+    font-size: 14px;
+    font-weight: bold;
+    transform: translateY(-100%);
+    pointer-events: none;
+    transition: visibility 0.2s ease;
+}

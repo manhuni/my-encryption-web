@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mã hoá & Giải mã</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <h1>Mã hoá & Giải mã</h1>
+
+        <!-- Dropdown chọn phương thức mã hoá/giải mã -->
+        <select id="method">
+            <option value="base64">Base64 Encoding/Decoding (mặc định)</option>
+            <option value="caesar">Caesar Cipher (+3/-3)</option>
+            <option value="reverse">Đảo ngược chuỗi</option>
+            <option value="reverse-chunk">Reverse Split Chunk</option>
+            <option value="custom">Đảo ngược chuỗi và chia thành cặp</option> <!-- Phương thức của bạn -->
+        </select>
+
+        <!-- Ô nhập chuỗi -->
+        <input type="text" id="inputText" placeholder="Nhập chuỗi..." />
+
+        <!-- Các nút mã hoá/giải mã -->
+        <div class="button-group">
+            <button onclick="encodeText()">🔐 Mã hoá</button>
+            <button onclick="decodeText()">🔓 Giải mã</button>
+        </div>
+
+        <!-- Kết quả đầu ra -->
+        <div id="outputText" class="output" title="Click để copy kết quả"></div>
+
+        <!-- Thông báo sao chép -->
+        <div id="copyMessage" class="copy-message">Copied!</div>
+    </div>
+
+    <!-- Nhúng mã JavaScript -->
+    <script src="script.js"></script>
+</body>
+
+</html>
