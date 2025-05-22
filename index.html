@@ -4,8 +4,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mã hoá & Giải mã</title>
+    <title>Mã hoá & Giải mã + Tra cứu App Store</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+        /* Thêm 1 chút style cho phần tra cứu */
+        #appLookupResult {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow: auto;
+            font-family: monospace;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,7 +31,7 @@
             <option value="caesar">Caesar Cipher (+3/-3)</option>
             <option value="reverse">Đảo ngược chuỗi</option>
             <option value="reverse-chunk">Reverse Split Chunk</option>
-            <option value="custom">Đảo ngược chuỗi và chia thành cặp</option> <!-- Phương thức của bạn -->
+            <option value="custom">Đảo ngược chuỗi và chia thành cặp</option>
         </select>
 
         <!-- Ô nhập chuỗi -->
@@ -35,10 +48,65 @@
 
         <!-- Thông báo sao chép -->
         <div id="copyMessage" class="copy-message">Copied!</div>
+
+        <!-- PHẦN MỚI: Tra cứu App Store -->
+        <hr />
+        <h2>Tra cứu thông tin App Store qua App ID hoặc Bundle ID</h2>
+        <input type="text" id="appIdInput"
+            placeholder="Nhập App ID (vd: 123456789) hoặc Bundle ID (vd: com.example.app)" />
+        <button onclick="lookupAppStore()">Tra cứu</button>
+
+        <pre id="appLookupResult">Kết quả tra cứu sẽ hiện ở đây...</pre>
     </div>
 
-    <!-- Nhúng mã JavaScript -->
     <script src="script.js"></script>
+
+    <script>
+        async function lookupAppStore() {
+            const input = document.getElementById('appIdInput').value.trim();
+            const output = document.getElementById('appLookupResult');
+            if (!input) {
+                output.textContent = 'Vui lòng nhập App ID hoặc Bundle ID.';
+                return;
+            }
+
+            let url = '';
+            // Kiểm tra xem input có phải là số (App ID) hay không
+            if (/^\d+$/.test(input)) {
+                url = `https://itunes.apple.com/lookup?id=${input}`;
+            } else {
+                url = `https://itunes.apple.com/lookup?bundleId=${encodeURIComponent(input)}`;
+            }
+
+            output.textContent = 'Đang tải dữ liệu...';
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const data = await response.json();
+
+                if (data.resultCount === 0) {
+                    output.textContent = 'Không tìm thấy app với ID/Bundle ID này.';
+                    return;
+                }
+
+                // Hiển thị thông tin app đẹp hơn
+                const app = data.results[0];
+                const appInfo = `
+Tên app: ${app.trackName}
+Phiên bản: ${app.version}
+Nhà phát triển: ${app.sellerName}
+Mô tả: ${app.description.substring(0, 200)}...
+App Store URL: ${app.trackViewUrl}
+`;
+                output.textContent = appInfo;
+
+            } catch (error) {
+                output.textContent = `Lỗi khi gọi API: ${error.message}`;
+            }
+        }
+    </script>
 </body>
 
 </html>
