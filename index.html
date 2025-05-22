@@ -6,12 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mã hoá & Giải mã + Tra cứu App Store</title>
     <link rel="stylesheet" href="style.css" />
+    <!-- Highlight.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+
+    <!-- Highlight.js script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
     <style>
         /* Style cho phần tra cứu */
         #appLookupSection {
             margin-top: 40px;
             padding-top: 20px;
             border-top: 2px solid #ccc;
+        }
+
+        pre code#appLookupResult {
+            text-align: left;
+            display: block;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         #appLookupResult {
@@ -72,13 +85,13 @@
         <div id="appLookupSection">
             <h2>Tra cứu thông tin App Store qua App ID hoặc Bundle ID</h2>
             <input type="text" id="appIdInput"
-                placeholder="Nhập App ID (vd: 123456789) hoặc Bundle ID (vd: com.example.app)" />
+                placeholder="Nhập App ID (vd: 6746188164) hoặc Bundle ID (vd: com.Dunk-Frenzy)" />
             <button onclick="lookupAppStore()">Tra cứu</button>
 
             <div id="appInfo"></div>
 
             <h3>Dữ liệu gốc (JSON):</h3>
-            <pre id="appLookupResult">Kết quả tra cứu sẽ hiện ở đây...</pre>
+            <pre><code id="appLookupResult" class="json">Kết quả tra cứu sẽ hiện ở đây...</code></pre>
         </div>
     </div>
 
@@ -166,7 +179,10 @@
                     });
                 }
 
+                // Trong function lookupAppStore() sau khi lấy data:
                 output.textContent = JSON.stringify(data, null, 2);
+                hljs.highlightElement(output);
+
 
             } catch (error) {
                 output.textContent = `Lỗi khi gọi API: ${error.message}`;
