@@ -7,16 +7,58 @@
     <title>Mã hoá & Giải mã + Tra cứu App Store</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-        /* Thêm 1 chút style cho phần tra cứu */
+        /* Style cho phần tra cứu */
         #appLookupResult {
             margin-top: 20px;
-            white-space: pre-wrap;
             background: #f0f0f0;
-            padding: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        #appLookupResult p {
+            margin: 8px 0;
+        }
+
+        #appLookupResult a {
+            color: #007aff;
+            text-decoration: none;
+        }
+
+        #appLookupResult a:hover {
+            text-decoration: underline;
+        }
+
+        #showMoreBtn {
+            display: inline-block;
+            margin-top: 5px;
+            color: #007aff;
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+        }
+
+        /* Phần raw JSON */
+        #rawDataContainer {
+            margin-top: 30px;
+        }
+
+        #rawData {
+            background: #222;
+            color: #eee;
+            padding: 15px;
             border-radius: 5px;
             max-height: 300px;
-            overflow: auto;
-            font-family: monospace;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
     </style>
 </head>
@@ -56,26 +98,35 @@
             placeholder="Nhập App ID (vd: 123456789) hoặc Bundle ID (vd: com.example.app)" />
         <button onclick="lookupAppStore()">Tra cứu</button>
 
-        <pre id="appLookupResult">Kết quả tra cứu sẽ hiện ở đây...</pre>
-    </div>
+        <div id="appLookupResult">Kết quả tra cứu sẽ hiện ở đây...</div>
 
-    <script src="script.js"></script>
+        <div id="rawDataContainer" style="display:none;">
+            <h3>Raw Data JSON</h3>
+            <pre id="rawData">...</pre>
+        </div>
+    </div>
 
     <script>
         async function lookupAppStore() {
             const input = document.getElementById('appIdInput').value.trim();
             const output = document.getElementById('appLookupResult');
+            const rawDataContainer = document.getElementById('rawDataContainer');
+            const rawData = document.getElementById('rawData');
+
+            rawDataContainer.style.display = 'none';
+            rawData.textContent = '';
+
             if (!input) {
                 output.textContent = 'Vui lòng nhập App ID hoặc Bundle ID.';
                 return;
             }
 
+            let cacheBust = Date.now();
             let url = '';
-            // Kiểm tra xem input có phải là số (App ID) hay không
             if (/^\d+$/.test(input)) {
-                url = `https://itunes.apple.com/lookup?id=${input}`;
+                url = `https://itunes.apple.com/lookup?id=${input}&cacheBust=${cacheBust}`;
             } else {
-                url = `https://itunes.apple.com/lookup?bundleId=${encodeURIComponent(input)}`;
+                url = `https://itunes.apple.com/lookup?bundleId=${encodeURIComponent(input)}&cacheBust=${cacheBust}`;
             }
 
             output.textContent = 'Đang tải dữ liệu...';
@@ -91,22 +142,60 @@
                     return;
                 }
 
-                // Hiển thị thông tin app đẹp hơn
                 const app = data.results[0];
-                const appInfo = `
-Tên app: ${app.trackName}
-Phiên bản: ${app.version}
-Nhà phát triển: ${app.sellerName}
-Mô tả: ${app.description.substring(0, 200)}...
-App Store URL: ${app.trackViewUrl}
-`;
-                output.textContent = appInfo;
+
+                function createDescription(desc) {
+                    const maxLen = 300;
+                    if (desc.length <= maxLen) return `<p><strong>Mô tả:</strong> ${desc}</p>`;
+
+                    const shortDesc = desc.substring(0, maxLen);
+                    const fullDesc = desc;
+
+                    return `
+                        <p><strong>Mô tả:</strong> <span id="shortDesc">${shortDesc}...</span><span id="fullDesc" style="display:none;">${fullDesc}</span></p>
+                        <span id="showMoreBtn">Xem thêm</span>
+                    `;
+                }
+
+                output.innerHTML = `
+                    <p><strong>Tên app:</strong> ${app.trackName}</p>
+                    <p><strong>Phiên bản:</strong> ${app.version}</p>
+                    <p><strong>Nhà phát triển:</strong> ${app.sellerName}</p>
+                    ${createDescription(app.description)}
+                    <p><strong>App Store URL:</strong> <a href="${app.trackViewUrl}" target="_blank" rel="noopener noreferrer">${app.trackViewUrl}</a></p>
+                    <p><strong>Giá:</strong> ${app.formattedPrice || 'Miễn phí'}</p>
+                    <p><strong>Ngày phát hành:</strong> ${app.releaseDate ? new Date(app.releaseDate).toLocaleDateString() : 'Không có'}</p>
+                    <p><strong>Thể loại:</strong> ${app.genres ? app.genres.join(', ') : 'Không có'}</p>
+                `;
+
+                const showMoreBtn = document.getElementById('showMoreBtn');
+                if (showMoreBtn) {
+                    showMoreBtn.addEventListener('click', () => {
+                        const shortDesc = document.getElementById('shortDesc');
+                        const fullDesc = document.getElementById('fullDesc');
+                        if (fullDesc.style.display === 'none') {
+                            fullDesc.style.display = 'inline';
+                            shortDesc.style.display = 'none';
+                            showMoreBtn.textContent = 'Thu gọn';
+                        } else {
+                            fullDesc.style.display = 'none';
+                            shortDesc.style.display = 'inline';
+                            showMoreBtn.textContent = 'Xem thêm';
+                        }
+                    });
+                }
+
+                rawDataContainer.style.display = 'block';
+                rawData.textContent = JSON.stringify(data, null, 2);
 
             } catch (error) {
                 output.textContent = `Lỗi khi gọi API: ${error.message}`;
+                rawDataContainer.style.display = 'none';
+                rawData.textContent = '';
             }
         }
     </script>
+
 </body>
 
 </html>
