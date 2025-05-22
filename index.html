@@ -8,57 +8,34 @@
     <link rel="stylesheet" href="style.css" />
     <style>
         /* Style cho phần tra cứu */
+        #appLookupSection {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ccc;
+        }
+
         #appLookupResult {
-            margin-top: 20px;
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 5px;
-            max-height: 400px;
-            overflow-y: auto;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #333;
-        }
-
-        #appLookupResult p {
-            margin: 8px 0;
-        }
-
-        #appLookupResult a {
-            color: #007aff;
-            text-decoration: none;
-        }
-
-        #appLookupResult a:hover {
-            text-decoration: underline;
-        }
-
-        #showMoreBtn {
-            display: inline-block;
-            margin-top: 5px;
-            color: #007aff;
-            cursor: pointer;
-            user-select: none;
-            font-weight: bold;
-        }
-
-        /* Phần raw JSON */
-        #rawDataContainer {
-            margin-top: 30px;
-        }
-
-        #rawData {
-            background: #222;
-            color: #eee;
-            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            background: #f9f9f9;
+            padding: 10px;
             border-radius: 5px;
             max-height: 300px;
             overflow-y: auto;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 13px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            font-family: monospace;
+            border: 1px solid #ddd;
+        }
+
+        #appInfo {
+            font-family: Arial, sans-serif;
+            line-height: 1.5em;
+        }
+
+        #showMoreBtn {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+            user-select: none;
         }
     </style>
 </head>
@@ -92,29 +69,29 @@
         <div id="copyMessage" class="copy-message">Copied!</div>
 
         <!-- PHẦN MỚI: Tra cứu App Store -->
-        <hr />
-        <h2>Tra cứu thông tin App Store qua App ID hoặc Bundle ID</h2>
-        <input type="text" id="appIdInput"
-            placeholder="Nhập App ID (vd: 123456789) hoặc Bundle ID (vd: com.example.app)" />
-        <button onclick="lookupAppStore()">Tra cứu</button>
+        <div id="appLookupSection">
+            <h2>Tra cứu thông tin App Store qua App ID hoặc Bundle ID</h2>
+            <input type="text" id="appIdInput"
+                placeholder="Nhập App ID (vd: 123456789) hoặc Bundle ID (vd: com.example.app)" />
+            <button onclick="lookupAppStore()">Tra cứu</button>
 
-        <div id="appLookupResult">Kết quả tra cứu sẽ hiện ở đây...</div>
+            <div id="appInfo"></div>
 
-        <div id="rawDataContainer" style="display:none;">
-            <h3>Raw Data JSON</h3>
-            <pre id="rawData">...</pre>
+            <h3>Dữ liệu gốc (JSON):</h3>
+            <pre id="appLookupResult">Kết quả tra cứu sẽ hiện ở đây...</pre>
         </div>
     </div>
+
+    <script src="script.js"></script>
 
     <script>
         async function lookupAppStore() {
             const input = document.getElementById('appIdInput').value.trim();
+            const appInfo = document.getElementById('appInfo');
             const output = document.getElementById('appLookupResult');
-            const rawDataContainer = document.getElementById('rawDataContainer');
-            const rawData = document.getElementById('rawData');
 
-            rawDataContainer.style.display = 'none';
-            rawData.textContent = '';
+            appInfo.innerHTML = '';
+            output.textContent = '';
 
             if (!input) {
                 output.textContent = 'Vui lòng nhập App ID hoặc Bundle ID.';
@@ -144,6 +121,7 @@
 
                 const app = data.results[0];
 
+                // Hiển thị mô tả với "Xem thêm" nếu dài
                 function createDescription(desc) {
                     const maxLen = 300;
                     if (desc.length <= maxLen) return `<p><strong>Mô tả:</strong> ${desc}</p>`;
@@ -152,12 +130,15 @@
                     const fullDesc = desc;
 
                     return `
-                        <p><strong>Mô tả:</strong> <span id="shortDesc">${shortDesc}...</span><span id="fullDesc" style="display:none;">${fullDesc}</span></p>
-                        <span id="showMoreBtn">Xem thêm</span>
+                        <p><strong>Mô tả:</strong> 
+                            <span id="shortDesc">${shortDesc}...</span>
+                            <span id="fullDesc" style="display:none;">${fullDesc}</span>
+                            <br><span id="showMoreBtn">Xem thêm</span>
+                        </p>
                     `;
                 }
 
-                output.innerHTML = `
+                appInfo.innerHTML = `
                     <p><strong>Tên app:</strong> ${app.trackName}</p>
                     <p><strong>Phiên bản:</strong> ${app.version}</p>
                     <p><strong>Nhà phát triển:</strong> ${app.sellerName}</p>
@@ -185,17 +166,13 @@
                     });
                 }
 
-                rawDataContainer.style.display = 'block';
-                rawData.textContent = JSON.stringify(data, null, 2);
+                output.textContent = JSON.stringify(data, null, 2);
 
             } catch (error) {
                 output.textContent = `Lỗi khi gọi API: ${error.message}`;
-                rawDataContainer.style.display = 'none';
-                rawData.textContent = '';
             }
         }
     </script>
-
 </body>
 
 </html>
